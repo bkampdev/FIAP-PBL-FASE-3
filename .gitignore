@@ -1,0 +1,15 @@
+# Ambiente local e materiais acadêmicos de referência
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+*.rtf
+*.vtt
+# PDFs finais devem ficar em relatorio/; não publicar capítulos didáticos.
+*.pdf
+!relatorio/*.pdf
+dist/
+tmp/
