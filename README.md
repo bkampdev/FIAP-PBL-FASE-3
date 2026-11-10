@@ -1,20 +1,51 @@
-# FIAP PBL - Fase 3: sistemas da colônia Aurora
+# FIAP PBL - Fase 3 | Colônia Aurora
 
-Planejamento do sistema integrado da colônia: organização de dados, regras de decisão, regressão linear simples e análise energética.
+A Colônia Aurora é um projeto didático em Python para organizar dados dos subsistemas, comparar geração e consumo, priorizar o suporte à vida e estimar a geração eólica do próximo intervalo.
 
-**Estado atual: organização inicial. O sistema e o PDF ainda serão desenvolvidos nas issues.** Não há execução ou testes aprovados nesta versão inicial.
+**Estado desta versão.** A regressão e a formatação da saída têm testes executáveis. A execução integrada depende da issue [#10](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/10). O relatório é uma versão para revisão, com exemplos sintéticos e propostas de integração identificados no texto.
 
-## Entrega e referência
+## Como reproduzir o que está disponível
 
-- [Atividade no FIAP ON](https://on.fiap.com.br/mod/assign/view.php?id=616829), conferida em 04/11/2026.
-- Prazo oficial: **11/11/2026 às 23h59**, horário de São Paulo.
-- Meta interna sugerida: candidata em 08/11, revisão em 09/11 e pacote pronto em 10/11.
-- Obrigatórios: um sistema Python organizado em funções, este repositório público, README com entrada/saída e relatório PDF objetivo com link do GitHub.
-- O enunciado desta fase não fixa número de páginas nem exige bibliotecas avançadas. Não aplicar os limites da Fase 2.
+Os módulos usam a biblioteca padrão. Os testes foram conferidos em Python 3.11 e 3.14.
 
-## Equipe e divisão
+```bash
+git clone https://github.com/bkampdev/FIAP-PBL-FASE-3.git
+cd FIAP-PBL-FASE-3
+```
 
-| Integrante | GitHub | Issues planejadas | Responsabilidade |
+Na cópia que contém estes arquivos, execute a suíte a partir da raiz:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Para reproduzir a previsão isolada, informe vento histórico de 8, 10 e 12 m/s, geração correspondente de 20, 25 e 30 kWh e vento previsto de 11 m/s:
+
+```bash
+python -c "from src.previsao import ajustar_reta, prever_energia; modelo = ajustar_reta([8, 10, 12], [20, 25, 30]); print(prever_energia(modelo, 11)['energia_eolica_prevista_kwh'])"
+```
+
+Saída em kWh para um intervalo didático de 1 h:
+
+```text
+27.5
+```
+
+O [exemplo de saída](docs/exemplos_saida.md) mostra como reproduzir o cenário sintético do teste de apresentação. O comando previsto para o programa completo é `python main.py --cenario deficit`, sujeito à conferência após a integração.
+
+## Funcionamento
+
+O fluxo proposto começa com a validação e a consulta à hierarquia dos subsistemas. Depois, o balanço compara a geração solar e eólica observada com o consumo e informa a reserva separadamente. As decisões dão prioridade ao suporte à vida. A previsão estima a geração eólica futura a partir do histórico e serve de entrada ao planejamento do próximo intervalo.
+
+- [Contratos do sistema](docs/contratos.md) e [requisitos da atividade](docs/requisitos.md).
+- [Método de previsão e conta manual](docs/previsao.md).
+- [Relatório em PDF](relatorio/relatorio.pdf) e [fonte editável](relatorio/relatorio.md).
+
+Para regenerar o PDF, instale `reportlab` com `python -m pip install reportlab` e rode `python scripts/gerar_relatorio.py`. Essa dependência é exclusiva da geração do documento.
+
+## Equipe
+
+| Integrante | GitHub | Issues | Responsabilidade |
 |---|---|---|---|
 | Guilherme Cardoso Bremenkamp | @bkampdev | 1, 10, 15 | Contratos, integração e entrega |
 | Davi Coninck Cassaro | @daviconinck | 2, 6, 11 | Dados, cenários e validação |
@@ -22,39 +53,4 @@ Planejamento do sistema integrado da colônia: organização de dados, regras de
 | Eduardo Backes Klauck | @BackesEdu | 4, 8, 13 | Energia, validação matemática e documentação |
 | Gabriel Gonzales | @ItsTheContext | 5, 9, 14 | Regressão, apresentação e consolidação documental |
 
-As responsabilidades incluem código para os cinco integrantes. A conclusão depende de contribuição verificável, entendimento e revisão; quantidade de issues não mede esforço. Os convites de acesso precisam ser aceitos pelos colegas.
-
-## Funcionamento planejado
-
-`dados → validação e consulta hierárquica → balanço energético → ajuste e previsão → decisões atuais/futuras → saída explicada`
-
-O cenário deverá usar listas para histórico, dicionários para acesso por identificador e estrutura hierárquica para os subsistemas. Solar e eólico compõem geração; suporte à vida tem prioridade sobre cargas não essenciais. A estimativa eólica participa do planejamento do próximo intervalo.
-
-## Exemplos de aceite (a implementar)
-
-| Entrada didática | Resultado a verificar |
-|---|---|
-| Geração 40 kWh, consumo 70 kWh no mesmo intervalo | Saldo -30 kWh e alerta de déficit; preservar essenciais |
-| Geração 80 kWh, consumo 30 kWh | Saldo +50 kWh e sugestão de armazenamento |
-| Geração 50 kWh, consumo 50 kWh | Equilíbrio |
-| Histórico vento [8,10,12], energia [20,25,30]; vento previsto 11 m/s | Reta y=2,5x; previsão 27,5 kWh no intervalo do histórico |
-
-Esses resultados são referências calculadas, não saídas de um programa já executado. Limites físicos e operacionais serão hipóteses didáticas identificadas.
-
-## Execução
-
-Ainda não disponível. A issue #10 implementará a entrada do programa e a #14 publicará o comando validado. Proposta: `python3 main.py --cenario deficit`; testes planejados: `python3 -m unittest discover -s tests -v`. Não executar esses comandos antes da implementação. O núcleo deverá funcionar com a biblioteca padrão; versão mínima final será conferida na integração.
-
-## Organização
-
-- `src/`: módulos a implementar para dados, energia, previsão, decisões, apresentação e integração.
-- `dados/`: cenários e histórico sintéticos reproduzíveis.
-- `tests/`: testes dos módulos e da integração.
-- `docs/`: requisitos, contratos propostos, divisão, revisão e seções do relatório.
-- `relatorio/`: fonte consolidada e PDF final, após a issue #14.
-
-Consulte [requisitos](docs/requisitos.md), [contratos propostos](docs/contratos.md), [plano](docs/plano-trabalho.md) e [como contribuir](CONTRIBUTING.md).
-
-## Grupo e envio no portal
-
-Na consulta de 04/11/2026, a atividade estava com entrega pendente e o Grupo 20 mostrava somente Guilherme. A composição precisa ser regularizada e conferida na issue #15; convites GitHub não alteram o grupo FIAP. Publicação de arquivos e merge não comprovam envio acadêmico.
+O [plano de trabalho](docs/plano-trabalho.md) detalha a divisão e a revisão cruzada. A atividade prevê a entrega de um programa integrado e do relatório até **11/11/2026 às 23h59**, no horário de São Paulo, conforme o [registro de requisitos](docs/requisitos.md).
