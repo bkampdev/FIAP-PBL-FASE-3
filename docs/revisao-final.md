@@ -436,3 +436,169 @@ Permanece a revisão pessoal de Lorenzo sobre dados/testes de Davi e a
 revalidação no SHA final da PR consolidada, a cargo do coordenador.
 Este resultado de integração não fecha issues, não publica PR individual
 e não representa envio ao FIAP.
+
+## Auditoria final das issues #2, #6 e #11 na PR #28 — 11/11/2026
+
+### Candidata, ambiente e limites da conferência
+
+Esta rodada confere a candidata documental e funcional
+`1bdde52388ef4e4964b8337323a9af694ff96ea4`, da branch
+`bkampdev/pbl-entrega-relatorio-final`, sobre o merge da PR #27
+`6f8435480293b1d38a146e399b4fbb54c2e6d9c3`.
+O clone remoto novo em `/private/tmp/pbl3-auditoria-dados-remoto-20261111`
+começou e terminou sem alterações, com macOS 26.0, build 25A5316i,
+Python 3.14.7 e nenhuma instalação adicional para o núcleo ou os testes.
+Um clone local independente do mesmo SHA também aprovou os 105 testes.
+
+As instruções atuais do README para `python3`, listagem, déficit, suíte e
+regressão isolada foram reproduzidas. O bloco de saída de `deficit` do
+README coincide integralmente com stdout, inclusive acentos e quebras de
+linha. O achado histórico de escolha de interpretador foi resolvido pelo
+README atual, que indica `python3` no macOS/Linux e `python` ou `py -3` no
+Windows; os registros anteriores foram preservados como histórico.
+
+**Windows não foi verificado nesta rodada.** O canal remoto retornou
+`timed out` tanto na tentativa de obter versões/comandos quanto no health
+check, sem saída que permitisse comprovar execução. O coordenador orientou
+registrar essa limitação e concluir a conferência macOS, sem novas tentativas.
+Os comandos equivalentes abaixo são instruções para reteste, não resultados
+Windows atuais. A reprodução Windows de `9d0b0d8` no início deste documento
+continua sendo evidência histórica daquele SHA e daquela contagem de testes.
+
+### Comandos e resultados reproduzidos
+
+```bash
+git clone --no-local --branch bkampdev/pbl-entrega-relatorio-final https://github.com/bkampdev/FIAP-PBL-FASE-3.git /private/tmp/pbl3-auditoria-dados-remoto-20261111
+cd /private/tmp/pbl3-auditoria-dados-remoto-20261111
+git rev-parse HEAD
+git status --porcelain=v1
+python3 --version
+python3 -B main.py --listar
+python3 -B main.py --cenario deficit
+python3 -B -m unittest discover -s tests -v
+python3 -c "from src.previsao import ajustar_reta, prever_energia; modelo = ajustar_reta([8, 10, 12], [20, 25, 30]); print(prever_energia(modelo, 11)['energia_eolica_prevista_kwh'])"
+git diff --check
+git status --porcelain=v1
+```
+
+Saídas de referência desta execução: SHA completo acima;
+`Python 3.14.7`; oito IDs na ordem do JSON; déficit com geração 40,
+consumo 70, saldo −30, reserva 15 e eólica prevista 27,5 kWh;
+`Ran 105 tests in 0.537s`, `OK`; previsão isolada `27.5`.
+Todos esses comandos retornaram 0 e as inspeções Git não produziram saída.
+
+Para Windows, na raiz de uma cópia da mesma candidata, substituir o
+interpretador conforme o README:
+
+```powershell
+py -3 main.py --listar
+py -3 main.py --cenario deficit
+py -3 -B -m unittest discover -s tests -v
+py -3 -c "from src.previsao import ajustar_reta, prever_energia; modelo = ajustar_reta([8, 10, 12], [20, 25, 30]); print(prever_energia(modelo, 11)['energia_eolica_prevista_kwh'])"
+```
+
+Pode-se usar `python` no lugar de `py -3` quando esse for o interpretador
+disponível. Para captura UTF-8 explícita, inserir `-X utf8` após o comando
+do interpretador, conforme já usado pelos testes complementares.
+
+### Oito cenários e caminhos de erro
+
+Os oito casos foram executados individualmente pela CLI e pelo integrador.
+Cada stdout coincidiu com `formatar_resultado(resultado) + "\n"` e retornou
+código 0, sem stderr. As contas abaixo foram comparadas com valores
+esperados fixos, usando `math.isclose` com tolerâncias `1e-9`, e com as
+tabelas de `docs/cenarios.md`. Todas as energias estão em kWh por intervalo.
+
+| Cenário | Saldo atual | Cobertura potencial | Déficit remanescente | Eólica prevista | Saldo futuro | Status atual |
+|---|---:|---:|---:|---:|---:|---|
+| nominal | 10 | 0 | 0 | 25 | 10 | excedente |
+| deficit | -30 | 15 | 15 | 27,5 | -22,5 | alerta_deficit |
+| excedente | 50 | 0 | 0 | 30 | 50 | excedente |
+| equilibrio | 0 | 0 | 0 | 20 | 0 | equilibrio |
+| alerta_critico | -40 | 5 | 35 | 20 | -25 | alerta_critico |
+| fronteira_essencial | -20 | 5 | 15 | 25 | -5 | alerta_deficit |
+| vento_baixo | -10 | 0 | 10 | 20 | -10 | alerta_deficit |
+| vento_alto | -10 | 0 | 10 | 30 | 0 | alerta_deficit |
+
+Comparação profunda antes/depois confirmou entradas imutáveis. Todos os
+envelopes têm exatamente as seis chaves contratuais e ambos os erros
+ausentes nos casos válidos. As consultas reais de solar/eólico retornam
+`{}` e o caminho nuclear inexistente retorna `None` em cada cenário.
+O perfil de chamadas com `sys.setprofile` confirmou `validar_cenario`,
+`buscar_subsistema`, `analisar_energia`, `ajustar_reta`, `prever_energia`,
+`decidir`, `formatar_resultado` e `executar_cenario`: os cinco módulos são
+usados no fluxo, além do integrador.
+
+O rastreio completo de `deficit` das seções anteriores permanece válido
+neste SHA: 40 − 70 = −30; cobertura potencial `min(15, 30)=15`;
+remanescente 15; `a=2.5`, `b=0`; eólica futura `2.5 × 11=27.5`;
+saldo futuro `20 + 27.5 − 70 = −22.5`; reserva restante hipotética zero.
+O cenário crítico mantém falta de 20 kWh para essenciais e intervenção
+humana; a igualdade `30 + 5 = 35` da fronteira sinaliza dependência da
+reserva. A previsão nunca apaga o alerta atual dos dois cenários de vento.
+
+| Execução adicional | Código e saída observados |
+|---|---|
+| `--cenario inexistente` | 1; erro de entrada, sem balanço/decisão fictícios |
+| `--listar --cenarios <arquivo ausente>` | 1; erro de leitura amigável, sem traceback/stderr |
+| `--listar --cenarios <JSON contendo apenas {>` | 1; JSON inválido identificado, sem resultado fictício |
+| `--cenario deficit --historico <arquivo ausente>` | 0; saldo −30 e preservação dos essenciais; previsão indisponível com motivo |
+| `--cenario deficit --historico <JSON contendo apenas {>` | 0; mesmo resultado atual válido; erro de leitura do histórico exibido |
+| Nove pares comando/saída de `docs/exemplos_saida.md` | 9/9 stdout integrais idênticos; oito comandos válidos e um cenário inexistente |
+
+A suíte existente também cobre `bool`, NaN, infinito, negativo, campos/IDs
+inválidos, folhas incompatíveis, consumo negativo via JSON/CLI, histórico
+degenerado/despareado/incompatível, limites de escala, estimativa negativa
+com aviso, prioridade e consulta hierárquica. Nenhuma lacuna funcional nova
+foi encontrada; não foram duplicados testes nem alterados módulos/dados.
+
+### Matriz de aceite e revisão verificável
+
+Foram lidas integralmente as issues [#2](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/2),
+[#6](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/6) e
+[#11](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/11), suas conversas,
+descrições, conversas/reviews e threads inline dos PRs #21/#24/#27/#28.
+As três issues estavam abertas e sem comentários; nenhum dos quatro PRs
+tinha review formal ou thread inline. Ausência de review formal não apaga
+registros de conversa, mas também não comprova revisão pessoal de integrante.
+
+| Issue | Critério | Prova nesta candidata | Pendência |
+|---|---|---|---|
+| #2 | Listas, chave-valor e hierarquia demonstradas | JSON → lista/ID → árvore → integrador; exemplos em `docs/dados.md` | Sem lacuna técnica |
+| #2 | Rejeitar malformados preservando déficit válido | Testes `test_dados`, `test_sistema` e CLI inválida; déficit retorna 0 com alerta | Sem lacuna técnica |
+| #2 | Solar/eólico e consulta verificáveis | `{}`, `{}` e `None` nos oito cenários; perfil de chamadas | Sem lacuna técnica |
+| #2 | Testes válida/inválida/navegação | Suíte completa: 105/105, incluindo `TestDados` | Conferência pessoal do histórico por Gabriel ainda não comprovada; registros técnicos da conta Guilherme não são ampliados para outras pessoas |
+| #6 | JSONs independentes da máquina | Clone remoto limpo e execução com caminhos relativos; teste existente fora da raiz | Sem lacuna técnica; Windows atual não verificado |
+| #6 | Resultados dos oito casos documentados | Tabelas acima e `docs/cenarios.md`, CLI = integrador | Sem lacuna técnica |
+| #6 | Previsão usada no planejamento | Vento baixo/alto: mesmo saldo atual −10; futuros −10/0 | Sem lacuna técnica |
+| #6 | Sintéticos e hipóteses identificados | `docs/cenarios.md` explicita dados sintéticos, solar/consumo mantidos e reserva hipotética | Revisões pessoais de Eduardo e Lorenzo ainda não comprovadas |
+| #11 | Cópia limpa com commit/resultados | Clone remoto novo, SHA/ambiente/comandos/105 testes acima | Windows atual não verificado; histórico preservado |
+| #11 | Cenário rastreado ponta a ponta | `deficit`, funções reais dos cinco módulos, contas/saída/envelope | Sem lacuna técnica |
+| #11 | Bloqueadores corrigidos ou explicitados | README atual reproduzido; erros/fallback corretos; timeout Windows explícito | Retestar alterações posteriores no SHA consolidado |
+| #11 | Partes do revisor conferidas por outro integrante | Sem registro novo atribuível a Lorenzo | Revisão pessoal de Lorenzo sobre dados/testes de Davi permanece pendente |
+
+| PR | Estado conferido e rastreabilidade | Limite do aceite |
+|---|---|---|
+| [#21](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/21) | Integrado em `ac0891105a027274315cfc9e879c7fa434677465`; comentário técnico na conta `bkampdev` pediu documentos e folhas `dict`; correção `8d11aa5` presente | Descrição preserva conferências pessoais pendentes; não fecha #2/#6 |
+| [#24](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/24) | Integrado em `ebab10a20fed613d0afcf71712627b471b53c412`; três testes originais e revisão Windows histórica preservados | Autorização de integração não substitui Lorenzo |
+| [#27](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/27) | Integrado em `6f8435480293b1d38a146e399b4fbb54c2e6d9c3`; correção direta de consumo negativo e 105 testes presentes | Revisão automatizada e merge não suprem revisão pessoal |
+| [#28](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/28) | Aberto, head `1bdde52388ef4e4964b8337323a9af694ff96ea4`; README novo conferido nesta rodada | Integração, revalidação final e aceite documental a cargo do coordenador |
+
+### Acordos entre frentes e encaminhamento
+
+O alinhamento foi enviado aos workers de decisões, energia, apresentação e
+entrega pelo Orca. Energia confirmou a separação de saldo/reserva e futuro,
+e informou o ajuste textual `6584922edec7cc968bd01f69b7a2ab61750f701c`,
+sem mudança de campos/contas; esse commit não integra o SHA testado aqui.
+Apresentação foi avisada da igualdade README/CLI, dos valores contratuais
+e da ausência de revisão humana nova. Decisões recebeu os resultados dos
+oito cenários e dos limites críticos; entrega recebeu as pendências de
+revisão e a limitação Windows. O coordenador confirmou que essa limitação
+não bloqueia a conclusão desta auditoria técnica macOS.
+
+Encaminhamento: critérios técnicos de dados/cenários/integração atendidos
+na candidata indicada; preservar as revisões humanas pendentes antes do
+fechamento fundamentado das issues. Mudanças posteriores exigem reteste
+no SHA consolidado. Esta rodada modifica somente este registro; não altera
+README, relatório/PDF, checklist, autores históricos ou critérios de revisão,
+e não publica PR, faz merge, fecha issue ou envia a atividade.
