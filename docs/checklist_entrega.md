@@ -35,3 +35,15 @@ Conferência de **11/11/2026** sobre a candidata `1bdde52388ef4e4964b8337323a9af
 ## Condição de encerramento
 
 A #15 permanece **aberta** até confirmação real do envio, distinta do merge. Registrar então data/hora, SHA do pacote, nomes/versões dos anexos e status do portal, sem publicar e-mails ou credenciais. Davi confere execução e Gabriel artefatos conforme a issue, ou o coordenador registra explicitamente a decisão de substituição, sem atribuir revisão pessoal inexistente.
+
+## Atualização da candidata consolidada
+
+Após o retrato histórico acima, a branch `bkampdev/pbl-auditoria-final` reuniu as cinco auditorias. Nessa candidata, uma cópia Git limpa executou `python3 -B -m unittest discover -s tests` com **105 testes OK**, listou os oito cenários e reproduziu `deficit` com saldo atual de -30 kWh, previsão eólica de 27,5 kWh e saldo futuro de -22,5 kWh. O cenário inexistente retornou erro e código 1.
+
+O PDF final de duas páginas foi regenerado de `relatorio/relatorio.md` com `scripts/gerar_relatorio.py` e comparado byte a byte ao arquivo versionado. A inspeção visual das duas páginas não mostrou cortes; os cinco nomes e RMs, o link público e as hipóteses do cálculo estão presentes. `README.md`, Markdown, gerador e PDF estão na mesma candidata. O arquivo `repositorio_github.txt` contém o link público para anexação, se solicitado pelo portal.
+
+- [x] Candidata consolidada: código, README, Markdown e PDF conferidos no mesmo estado.
+- [x] PDF e `repositorio_github.txt` preparados para a entrega; abrir e selecionar os anexos ainda é tarefa de envio.
+- [ ] Integrar a PR consolidada à `main` e conferir o SHA publicado.
+- [ ] Receber as revisões pessoais pendentes registradas na auditoria.
+- [ ] Enviar no FIAP ON e guardar o comprovante real. O usuário reservou para si essa ação.
