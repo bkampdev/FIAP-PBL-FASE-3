@@ -1,1 +1,1 @@
-O relatório será consolidado na issue #14, a partir das seções #12 e #13. PDF ainda não gerado.
+`relatorio.md` é a fonte editável do relatório da issue #14. O PDF versionado é gerado a partir dela por `python3 scripts/gerar_relatorio.py`, com `reportlab` instalado apenas para esta etapa. O programa principal não depende dessa biblioteca.

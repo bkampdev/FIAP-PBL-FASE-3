@@ -87,7 +87,7 @@ def calcular_balanco_energia(geracao_solar: float, geracao_eolica: float, consum
             cobertura_reserva = deficit
             saldo_restante_com_reserva = 0.0
             status = "DÉFICIT_COBERTO_POR_RESERVA"
-            mensagem = f"ALERTA: Consumo maior que geração (Déficit de {deficit:.2f}). Coberto integralmente pela reserva."
+            mensagem = f"ALERTA: Consumo maior que geração (Déficit de {deficit:.2f} kWh). A reserva poderia cobrir integralmente esse déficit; nenhuma descarga foi executada."
         else:
             cobertura_reserva = reserva_atual
             saldo_restante_com_reserva = -(deficit - reserva_atual)

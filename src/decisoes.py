@@ -22,9 +22,22 @@ def _numero(valor, campo):
     """Aceita apenas int/float finito (bool é rejeitado)."""
     if isinstance(valor, bool) or not isinstance(valor, (int, float)):
         raise ValueError(f"{campo} deve ser um número finito.")
-    if not isfinite(valor):
-        raise ValueError(f"{campo} deve ser um número finito.")
-    return float(valor)
+    try:
+        if isfinite(valor):
+            return float(valor)
+    except OverflowError:
+        pass
+    raise ValueError(f"{campo} deve ser um número finito.")
+
+
+def _texto_nao_vazio(valor, campo):
+    if not isinstance(valor, str) or not valor.strip():
+        raise ValueError(f"{campo} deve ser texto não vazio.")
+
+
+def _inteiro_positivo(valor, campo):
+    if isinstance(valor, bool) or not isinstance(valor, int) or valor <= 0:
+        raise ValueError(f"{campo} deve ser um inteiro positivo.")
 
 
 def _iguais(x, y):
@@ -49,6 +62,9 @@ def _conferir_entradas(cenario, balanco, previsao):
         if chave != "saldo_kwh" and valor < 0:
             raise ValueError(f"{chave} não pode ser negativo.")
 
+    if "intervalo_h" in cenario and _numero(cenario["intervalo_h"], "intervalo_h") <= 0:
+        raise ValueError("intervalo_h deve ser positivo.")
+
     for campo in ("geracao_solar_kwh", "geracao_eolica_kwh", "reserva_kwh"):
         if campo not in cenario:
             raise ValueError(f"Cenário sem o campo obrigatório: {campo}.")
@@ -58,20 +74,33 @@ def _conferir_entradas(cenario, balanco, previsao):
     sistemas = cenario.get("sistemas")
     if not isinstance(sistemas, list) or not sistemas:
         raise ValueError("sistemas deve ser uma lista não vazia.")
+    ids_vistos = set()
     for sistema in sistemas:
         if not isinstance(sistema, dict):
             raise ValueError("Cada sistema deve ser um dicionário.")
         for campo in ("id", "nome", "consumo_kwh", "essencial", "prioridade"):
             if campo not in sistema:
                 raise ValueError(f"Sistema sem o campo obrigatório: {campo}.")
+        _texto_nao_vazio(sistema["id"], "id")
+        if sistema["id"] in ids_vistos:
+            raise ValueError(f"id de sistema duplicado: {sistema['id']}.")
+        ids_vistos.add(sistema["id"])
+        _texto_nao_vazio(sistema["nome"], "nome")
         if not isinstance(sistema["essencial"], bool):
             raise ValueError("essencial deve ser booleano.")
         if _numero(sistema["consumo_kwh"], "consumo_kwh") < 0:
             raise ValueError("consumo_kwh não pode ser negativo.")
+        _inteiro_positivo(sistema["prioridade"], "prioridade")
 
     suporte = [s for s in sistemas if s["id"] == "suporte_vida"]
-    if len(suporte) != 1 or suporte[0]["essencial"] is not True:
-        raise ValueError("suporte_vida deve existir uma vez e ser essencial.")
+    if (
+        len(suporte) != 1
+        or suporte[0]["essencial"] is not True
+        or suporte[0]["prioridade"] != 1
+    ):
+        raise ValueError(
+            "suporte_vida deve existir uma vez, ser essencial e ter prioridade 1."
+        )
 
     # Coerência entre cenário e balanço (evita decidir com números trocados).
     geracao = cenario["geracao_solar_kwh"] + cenario["geracao_eolica_kwh"]
@@ -98,6 +127,8 @@ def _conferir_entradas(cenario, balanco, previsao):
         if "energia_eolica_prevista_kwh" not in previsao:
             raise ValueError("Previsão sem energia_eolica_prevista_kwh.")
         _numero(previsao["energia_eolica_prevista_kwh"], "energia_eolica_prevista_kwh")
+        if previsao.get("aviso") is not None and not isinstance(previsao["aviso"], str):
+            raise ValueError("aviso da previsão deve ser texto ou None.")
 
 
 def ordenar_reducao(sistemas):
