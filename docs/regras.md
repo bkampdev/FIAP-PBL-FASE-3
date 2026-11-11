@@ -21,6 +21,7 @@ A primeira condição verdadeira define o `status`.
 - `suporte_vida` é obrigatório, essencial e prioridade 1. Sistemas com `essencial=True` **nunca** entram na fila de redução.
 - Fila de redução (`ordenar_reducao`): apenas não essenciais, **maior número de prioridade primeiro**; empate pelo `id` em ordem alfabética. Ex.: `lazer(4)`, `comunicacao(3)`, `estufa(3)`, `laboratorio(2)`.
 - No déficit, os candidatos são propostos em ordem até que a soma dos consumos alcance o déficit bruto. Ex.: déficit 5 → só `lazer` (5 kWh).
+- Sem consumidores não essenciais, uma ação informa o déficit e a cobertura potencial mesmo sem fila de redução. Ex.: geração 30, consumo essencial 35 e reserva 5 → déficit 5, cobertura 5 e remanescente 0 kWh.
 - A ordem dos registros no JSON não altera a decisão (testado invertendo a lista).
 
 ## Próximo intervalo (`recomendacao_futura`)
@@ -43,7 +44,9 @@ Exemplo: solar 20, consumo 50, reserva 0. Vento 8 m/s → eólica 20 → saldo f
 
 ## Erros de entrada
 
-`decidir` levanta `ValueError` antes de qualquer ação se: cenário/balanço não forem dicionários, faltar chave do balanço, houver número inválido (`bool`, `NaN`, infinito), o balanço não conferir com o cenário, `suporte_vida` faltar ou não for essencial, ou a previsão não for `dict`/`None`.
+`decidir` levanta `ValueError` e não retorna ações se: cenário/balanço não forem dicionários, faltar chave do balanço, houver número inválido (`bool`, `NaN`, infinito), o balanço não conferir com o cenário, `suporte_vida` faltar ou não for essencial, ou a previsão não for `dict`/`None`.
+
+Cobertura e déficit remanescente devem ser não negativos e corresponder a `min(reserva, max(0, -saldo))` e `max(0, -saldo) - cobertura`, respectivamente. A geração, o saldo e a disponibilidade calculados para o próximo intervalo também precisam ser finitos; transbordamento numérico gera `ValueError`.
 
 ## Conferência independente
 

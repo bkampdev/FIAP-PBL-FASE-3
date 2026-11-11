@@ -45,7 +45,9 @@ def _conferir_entradas(cenario, balanco, previsao):
     for chave in CHAVES_BALANCO:
         if chave not in balanco:
             raise ValueError(f"Balanço sem a chave obrigatória: {chave}.")
-        _numero(balanco[chave], chave)
+        valor = _numero(balanco[chave], chave)
+        if chave != "saldo_kwh" and valor < 0:
+            raise ValueError(f"{chave} não pode ser negativo.")
 
     for campo in ("geracao_solar_kwh", "geracao_eolica_kwh", "reserva_kwh"):
         if campo not in cenario:
@@ -82,8 +84,12 @@ def _conferir_entradas(cenario, balanco, previsao):
         raise ValueError("consumo_essencial_kwh não confere com o cenário.")
     if not _iguais(balanco["saldo_kwh"], geracao - consumo):
         raise ValueError("saldo_kwh não confere com geração menos consumo.")
-    if balanco["reserva_usada_kwh"] > cenario["reserva_kwh"] + 1e-9:
-        raise ValueError("reserva_usada_kwh maior que a reserva disponível.")
+    deficit = max(0.0, -balanco["saldo_kwh"])
+    cobertura = min(cenario["reserva_kwh"], deficit)
+    if not _iguais(balanco["reserva_usada_kwh"], cobertura):
+        raise ValueError("reserva_usada_kwh não confere com o déficit e a reserva.")
+    if not _iguais(balanco["deficit_remanescente_kwh"], deficit - cobertura):
+        raise ValueError("deficit_remanescente_kwh não confere com a cobertura.")
 
     if previsao is not None:
         if not isinstance(previsao, dict):
@@ -135,8 +141,11 @@ def _recomendacao_futura(cenario, balanco, previsao, acoes):
     solar = float(cenario["geracao_solar_kwh"])
     consumo = balanco["consumo_total_kwh"]
     essencial = balanco["consumo_essencial_kwh"]
-    saldo_futuro = solar + eolica_prevista - consumo
+    geracao_futura = _numero(solar + eolica_prevista, "geracao_futura_kwh")
+    saldo_futuro = _numero(geracao_futura - consumo, "saldo_futuro_kwh")
     reserva_restante = max(0.0, cenario["reserva_kwh"] - balanco["reserva_usada_kwh"])
+    disponibilidade_futura = _numero(
+        geracao_futura + reserva_restante, "disponibilidade_futura_kwh")
 
     texto = (
         f"Com solar mantida em {_fmt(solar)} kWh e consumo planejado em "
@@ -144,7 +153,7 @@ def _recomendacao_futura(cenario, balanco, previsao, acoes):
         f"leva a saldo futuro de {_fmt(saldo_futuro)} kWh. "
         f"Reserva restante hipotética: {_fmt(reserva_restante)} kWh. "
     )
-    if solar + eolica_prevista + reserva_restante < essencial:
+    if disponibilidade_futura < essencial:
         texto += ("Risco de insuficiência para os essenciais: "
                   "preparar intervenção humana e planejar redução de não essenciais.")
     elif saldo_futuro < 0:
@@ -211,14 +220,23 @@ def decidir(cenario, balanco, previsao):
                            f"essencial de {_fmt(essencial)} kWh"),
             })
         # Propõe reduções na ordem combinada até cobrir o déficit bruto.
+        candidatos = ordenar_reducao(sistemas)
+        motivo_deficit = (
+            f"Déficit de {_fmt(deficit)} kWh; reserva cobriria "
+            f"{_fmt(cobertura)} kWh e restariam {_fmt(remanescente)} kWh"
+        )
+        if not candidatos:
+            acoes.append({
+                "acao": "Informar déficit energético sem cargas não essenciais",
+                "motivo": motivo_deficit,
+            })
         reduzido = 0.0
-        for s in ordenar_reducao(sistemas):
+        for s in candidatos:
             if reduzido >= deficit:
                 break
             acoes.append({
                 "acao": f"Avaliar redução do {s['nome']}",
-                "motivo": (f"Déficit de {_fmt(deficit)} kWh; reserva cobriria "
-                           f"{_fmt(cobertura)} kWh e restariam {_fmt(remanescente)} kWh"),
+                "motivo": motivo_deficit,
             })
             reduzido += s["consumo_kwh"]
 

@@ -92,6 +92,18 @@ class TestStatus(unittest.TestCase):
         acoes = [a["acao"] for a in rodar(cenario_base())["acoes"]]
         self.assertNotIn("Sinalizar dependência da reserva", acoes)
 
+    def test_deficit_so_com_essenciais_informa_cobertura(self):
+        cenario = cenario_base(solar=20, eolica=10, reserva=5, vida=35)
+        cenario["sistemas"] = cenario["sistemas"][:1]
+        cenario["hierarquia"]["colonia"]["consumidores"] = {"suporte_vida": {}}
+        decisao = rodar(cenario, previsao=None)
+        self.assertEqual(decisao["status"], "alerta_deficit")
+        self.assertTrue(any(
+            "Déficit de 5 kWh; reserva cobriria 5 kWh e restariam 0 kWh"
+            in acao["motivo"] for acao in decisao["acoes"]
+        ))
+        self.assertFalse(any("redução" in acao["acao"] for acao in decisao["acoes"]))
+
 
 class TestPrevisao(unittest.TestCase):
     def test_sem_previsao(self):
@@ -112,6 +124,20 @@ class TestPrevisao(unittest.TestCase):
     def test_extrapolacao_mostra_aviso(self):
         decisao = rodar(cenario_base(), previsao=previsao_para(13.0))
         self.assertIn("Extrapolação", decisao["recomendacao_futura"])
+
+    def test_rejeita_geracao_futura_infinita(self):
+        cenario = cenario_base(solar=1e308, eolica=0, reserva=0, vida=1e308, lab=0)
+        previsao = prever_energia(
+            ajustar_reta([1.0, 2.0], [5e307, 1e308]), 2.0)
+        with self.assertRaisesRegex(ValueError, "geracao_futura_kwh"):
+            rodar(cenario, previsao=previsao)
+
+    def test_rejeita_disponibilidade_futura_infinita(self):
+        cenario = cenario_base(solar=1e308, eolica=0, reserva=1e308,
+                              vida=1e308, lab=0)
+        previsao = prever_energia(ajustar_reta([1.0, 2.0], [0.0, 0.0]), 2.0)
+        with self.assertRaisesRegex(ValueError, "disponibilidade_futura_kwh"):
+            rodar(cenario, previsao=previsao)
 
 
 class TestContrato(unittest.TestCase):
@@ -142,6 +168,25 @@ class TestContrato(unittest.TestCase):
         balanco = analisar_energia(cenario)
         del balanco["consumo_essencial_kwh"]
         with self.assertRaises(ValueError):
+            decidir(cenario, balanco, None)
+
+    def test_cobertura_e_remanescente_incoerentes_geram_erro(self):
+        cenario = cenario_base()
+        original = analisar_energia(cenario)
+        for campo in ("reserva_usada_kwh", "deficit_remanescente_kwh"):
+            for valor in (-100.0, -1e-12, 0.0, 999.0):
+                with self.subTest(campo=campo, valor=valor):
+                    balanco = dict(original)
+                    balanco[campo] = valor
+                    with self.assertRaisesRegex(ValueError, campo):
+                        decidir(cenario, balanco, None)
+                    self.assertEqual(balanco[campo], valor)
+
+    def test_rejeita_cobertura_inventada_no_excedente(self):
+        cenario = cenario_base(solar=50, eolica=30, reserva=15, vida=20, lab=10)
+        balanco = analisar_energia(cenario)
+        balanco["reserva_usada_kwh"] = 1.0
+        with self.assertRaisesRegex(ValueError, "reserva_usada_kwh"):
             decidir(cenario, balanco, None)
 
     def test_suporte_vida_nao_essencial_gera_erro(self):
