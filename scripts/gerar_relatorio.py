@@ -17,6 +17,8 @@ TEXTO = colors.HexColor("#253746")
 
 def formatar_inline(texto):
     texto = escape(texto)
+    texto = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", texto)
+    texto = texto.replace("\n", "<br/>")
     texto = re.sub(r"`([^`]+)`", r'<font name="Courier">\1</font>', texto)
     return re.sub(
         r"\[([^\]]+)\]\((https://[^\s)]+)\)",
@@ -33,7 +35,7 @@ def rodape(canvas, documento):
     canvas.line(esquerda, 44, direita, 44)
     canvas.setFillColor(AZUL)
     canvas.setFont("Helvetica", 9)
-    canvas.drawString(esquerda, 29, "FIAP PBL | Fase 3")
+    canvas.drawString(esquerda, 29, "FIAP PBL | Fase 3 | Colônia Aurora")
     canvas.drawRightString(direita, 29, str(documento.page))
 
 
@@ -44,12 +46,17 @@ def gerar():
         textColor=TEXTO, spaceAfter=8,
     )
     titulo = ParagraphStyle(
-        "Título", parent=corpo, fontName="Helvetica-Bold", fontSize=28,
-        leading=32, textColor=AZUL, spaceAfter=6, keepWithNext=True,
+        "Título", parent=corpo, fontName="Helvetica-Bold", fontSize=26,
+        leading=30, textColor=AZUL, spaceAfter=5, keepWithNext=True,
     )
     subtitulo = ParagraphStyle(
-        "Subtítulo", parent=corpo, fontSize=11, textColor=AZUL,
-        spaceAfter=15, keepWithNext=True,
+        "Subtítulo", parent=corpo, fontSize=10.5, leading=14, textColor=AZUL,
+        spaceAfter=6, keepWithNext=True,
+    )
+    equipe = ParagraphStyle(
+        "Equipe", parent=corpo, fontSize=9.0, leading=13.0, textColor=TEXTO,
+        backColor=colors.HexColor("#F3F7F9"), borderColor=colors.HexColor("#C8D8E0"),
+        borderWidth=0.6, borderPadding=6, spaceAfter=12, keepWithNext=True,
     )
     secao = ParagraphStyle(
         "Seção", parent=corpo, fontName="Helvetica-Bold", fontSize=14,
@@ -65,6 +72,8 @@ def gerar():
             bloco, estilo = bloco[3:], secao
         elif indice == 1:
             estilo = subtitulo
+        elif indice == 2 and bloco.startswith("**Integrantes:**"):
+            estilo = equipe
         paragrafos.append(Paragraph(formatar_inline(bloco), estilo))
 
     documento = SimpleDocTemplate(
@@ -74,8 +83,13 @@ def gerar():
         rightMargin=53,
         topMargin=49,
         bottomMargin=62,
-        title="Sistemas da Colônia Aurora",
-        author="Equipe Colônia Aurora",
+        title="Sistemas da Colônia Aurora — FIAP PBL Fase 3",
+        author=(
+            "Davi Coninck Cassaro (RM572772); Eduardo Backes Klauck (RM575889); "
+            "Gabriel Gonzales (RM574746); Guilherme Cardoso Bremenkamp (RM574229); "
+            "Lorenzo Mendes Rocha (RM575361)"
+        ),
+        subject="Atividade Integradora — Fase 3 | Colônia Aurora",
         invariant=True,
     )
     documento.build(paragrafos, onFirstPage=rodape, onLaterPages=rodape)

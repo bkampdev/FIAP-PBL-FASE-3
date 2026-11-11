@@ -20,7 +20,7 @@ python3 main.py --listar
 python3 main.py --cenario deficit
 ```
 
-O cenário `deficit` apresenta geração de 40 kWh, consumo de 70 kWh e saldo atual de -30 kWh. A reserva de 15 kWh poderia cobrir parte do déficit, restando 15 kWh; essa cobertura não representa descarga executada. A previsão eólica é de 27,5 kWh, com saldo futuro estimado de -22,5 kWh, mantendo a geração solar e o consumo e sem reaplicar a reserva. As recomendações preservam o suporte à vida e propõem avaliar a redução do laboratório.
+O cenário `deficit` apresenta geração de 40 kWh, consumo de 70 kWh e saldo atual de -30 kWh. A reserva de 15 kWh poderia cobrir parte do déficit, restando 15 kWh; essa cobertura não representa descarga executada. A previsão eólica é de 27,5 kWh, com saldo futuro estimado de -22,5 kWh, mantendo como hipóteses a geração solar e o consumo planejado e sem reaplicar a reserva. As recomendações preservam o suporte à vida e propõem avaliar a redução do laboratório.
 
 Saída real do comando `--cenario deficit`:
 
@@ -78,12 +78,12 @@ Para regenerar o PDF, instale `reportlab` com `python3 -m pip install reportlab`
 
 ## Equipe
 
-| Integrante | GitHub | Issues | Responsabilidade |
-|---|---|---|---|
-| Guilherme Cardoso Bremenkamp | @bkampdev | 1, 10, 14, 15 | Contratos, integração, relatório final e entrega |
-| Davi Coninck Cassaro | @daviconinck | 2, 6, 11 | Dados, cenários e validação |
-| Lorenzo Mendes Rocha | @Rocha0306 | 3, 7, 12 | Decisões, prioridades e documentação |
-| Eduardo Backes Klauck | @BackesEdu | 4, 8, 13 | Energia, validação matemática e documentação |
-| Gabriel Gonzales | @ItsTheContext | 5, 9 | Regressão e apresentação |
+| Integrante | RM | GitHub | Issues | Responsabilidade |
+|---|---|---|---|---|
+| Guilherme Cardoso Bremenkamp | RM574229 | @bkampdev | 1, 10, 14, 15 | Contratos, integração, consolidação final do relatório e entrega |
+| Davi Coninck Cassaro | RM572772 | @daviconinck | 2, 6, 11 | Dados, cenários e validação |
+| Lorenzo Mendes Rocha | RM575361 | @Rocha0306 | 3, 7, 12 | Decisões, prioridades e documentação |
+| Eduardo Backes Klauck | RM575889 | @BackesEdu | 4, 8, 13 | Energia, validação matemática e documentação |
+| Gabriel Gonzales | RM574746 | @ItsTheContext | 5, 9, 14 (base) | Regressão, apresentação e estrutura inicial do relatório |
 
 O [plano de trabalho](docs/plano-trabalho.md) detalha a divisão e a revisão cruzada. A atividade prevê a entrega de um programa integrado e do relatório até **11/11/2026 às 23h59**, no horário de São Paulo, conforme o [registro de requisitos](docs/requisitos.md).
