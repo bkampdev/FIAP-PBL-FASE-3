@@ -157,8 +157,8 @@ A recomendação final depende das regras do módulo de decisões.
 
 Executar na raiz do projeto:
 
-    python -m json.tool dados/cenarios.json
-    python -m json.tool dados/historico_eolico.json
+    python3 -m json.tool dados/cenarios.json
+    python3 -m json.tool dados/historico_eolico.json
 
 Carregar os arquivos pelo módulo de dados:
 
