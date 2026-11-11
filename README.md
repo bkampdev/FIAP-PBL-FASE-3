@@ -2,7 +2,7 @@
 
 A Colônia Aurora é um projeto didático em Python para organizar dados dos subsistemas, comparar geração e consumo, priorizar o suporte à vida e estimar a geração eólica do próximo intervalo.
 
-**Estado desta versão.** A regressão e a formatação da saída têm testes executáveis. A execução integrada depende da issue [#10](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/10). O relatório é uma versão para revisão, com exemplos sintéticos e propostas de integração identificados no texto.
+**Estado desta versão.** O programa integrado está disponível pelo terminal, com validação de dados, consulta hierárquica, balanço energético, decisões e previsão eólica. A suíte contém 100 testes automatizados. O relatório em PDF permanece uma versão para revisão; a [revisão final do sistema](docs/revisao-final.md) registra as verificações e as pendências de aceite.
 
 ## Como reproduzir o que está disponível
 
@@ -13,7 +13,16 @@ git clone https://github.com/bkampdev/FIAP-PBL-FASE-3.git
 cd FIAP-PBL-FASE-3
 ```
 
-Na cópia que contém estes arquivos, execute a suíte a partir da raiz:
+A partir da raiz, liste os oito cenários e execute a análise de déficit:
+
+```bash
+python main.py --listar
+python main.py --cenario deficit
+```
+
+O cenário `deficit` apresenta geração de 40 kWh, consumo de 70 kWh e saldo atual de -30 kWh. A previsão eólica é de 27,5 kWh, com saldo futuro estimado de -22,5 kWh, mantendo a geração solar e o consumo. As recomendações preservam o suporte à vida e propõem avaliar a redução do laboratório.
+
+Execute a suíte completa:
 
 ```bash
 python -m unittest discover -s tests -v
@@ -31,11 +40,11 @@ Saída em kWh para um intervalo didático de 1 h:
 27.5
 ```
 
-O [exemplo de saída](docs/exemplos_saida.md) mostra como reproduzir o cenário sintético do teste de apresentação. O comando previsto para o programa completo é `python main.py --cenario deficit`, sujeito à conferência após a integração.
+O [exemplo de saída](docs/exemplos_saida.md) mostra como reproduzir o cenário sintético do teste de apresentação. Os oito cenários e seus resultados esperados estão documentados em [cenarios.md](docs/cenarios.md).
 
 ## Funcionamento
 
-O fluxo proposto começa com a validação e a consulta à hierarquia dos subsistemas. Depois, o balanço compara a geração solar e eólica observada com o consumo e informa a reserva separadamente. As decisões dão prioridade ao suporte à vida. A previsão estima a geração eólica futura a partir do histórico e serve de entrada ao planejamento do próximo intervalo.
+O fluxo começa com a validação e a consulta à hierarquia dos subsistemas. Depois, o balanço compara a geração solar e eólica observada com o consumo e informa a reserva separadamente. As decisões dão prioridade ao suporte à vida. A previsão estima a geração eólica futura a partir do histórico e serve de entrada ao planejamento do próximo intervalo.
 
 - [Contratos do sistema](docs/contratos.md) e [requisitos da atividade](docs/requisitos.md).
 - [Método de previsão e conta manual](docs/previsao.md).
