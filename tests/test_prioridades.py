@@ -105,6 +105,17 @@ class TestPrioridade(unittest.TestCase):
         reducoes = [a["acao"] for a in d["acoes"] if "redução" in a["acao"]]
         self.assertEqual(reducoes, ["Avaliar redução do Lazer"])
 
+    def test_reducao_acumula_ate_deficit_bruto_mesmo_com_reserva_parcial(self):
+        # Geração 53, consumo 65, reserva 10 -> déficit bruto 12, cobertura 10, restante 2.
+        # Fila segue o déficit bruto (12), com desempate alfabético em P3, parando antes do Laboratório.
+        d = decidir_cenario(cenario(33, 20, 10, self.sistemas()))
+        reducoes = [a for a in d["acoes"] if "redução" in a["acao"]]
+        self.assertEqual(
+            [a["acao"] for a in reducoes],
+            ["Avaliar redução do Lazer", "Avaliar redução do Comunicacao", "Avaliar redução do Estufa"],
+        )
+        self.assertIn("Déficit de 12 kWh; reserva cobriria 10 kWh e restariam 2 kWh", reducoes[0]["motivo"])
+
 
 class TestAtualVersusFuturo(unittest.TestCase):
     def test_vento_menor_muda_so_o_futuro(self):
@@ -119,6 +130,24 @@ class TestAtualVersusFuturo(unittest.TestCase):
         self.assertIn("Planejar redução", baixo["recomendacao_futura"])
         self.assertIn("saldo futuro de 0 kWh", alto["recomendacao_futura"])
         self.assertIn("Sem margem", alto["recomendacao_futura"])
+
+    def test_risco_critico_futuro_sem_reaplicar_reserva_e_fronteira(self):
+        # Geração 30, consumo 45 (essencial 35 + lab 10), reserva 15 -> reserva_restante = 0.
+        c = cenario(10, 20, 15, [sistema("suporte_vida", 35.0, True, 1),
+                                 sistema("laboratorio", 10.0, False, 2)])
+        abaixo = decidir_cenario(c, previsao(8.0))   # 10 + 20 + 0 = 30 < 35
+        fronteira = decidir_cenario(c, previsao(10.0))  # 10 + 25 + 0 = 35 == 35
+        self.assertEqual(abaixo["status"], "alerta_deficit")
+        self.assertIn("Reserva restante hipotética: 0 kWh", abaixo["recomendacao_futura"])
+        self.assertIn("Risco de insuficiência para os essenciais", abaixo["recomendacao_futura"])
+        self.assertNotIn("Risco de insuficiência", fronteira["recomendacao_futura"])
+        self.assertIn("Planejar redução de não essenciais.", fronteira["recomendacao_futura"])
+
+    def test_excedente_futuro_nao_altera_equilibrio_atual(self):
+        d = decidir_cenario(cenario(30, 20, 0, padrao()), previsao(12.0))
+        self.assertEqual(d["status"], "equilibrio")
+        self.assertIn("saldo futuro de 10 kWh", d["recomendacao_futura"])
+        self.assertIn("Avaliar armazenamento ou uso planejado do excedente estimado.", d["recomendacao_futura"])
 
     def test_critico_nao_promete_seguranca(self):
         d = decidir_cenario(cenario(5, 5, 5, padrao()), previsao(8.0))

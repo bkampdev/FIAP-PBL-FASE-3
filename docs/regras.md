@@ -44,10 +44,10 @@ Exemplo: solar 20, consumo 50, reserva 0. Vento 8 m/s → eólica 20 → saldo f
 
 ## Erros de entrada
 
-`decidir` levanta `ValueError` e não retorna ações se: cenário/balanço não forem dicionários, faltar chave do balanço, houver número inválido (`bool`, `NaN`, infinito), o balanço não conferir com o cenário, `suporte_vida` faltar ou não for essencial, ou a previsão não for `dict`/`None`.
+`decidir` recebe cenário e balanço já validados por `src/dados.py`/`src/sistema.py` e, em chamada direta, levanta `ValueError` sem retornar ações se: cenário/balanço não forem dicionários, faltar chave obrigatória, houver número inválido (`bool`, `NaN`, infinito) ou energia/reserva/`consumo_kwh` negativos, o balanço não conferir com o cenário, `suporte_vida` faltar ou não for essencial, ou a previsão não for `dict`/`None`.
 
 Cobertura e déficit remanescente devem ser não negativos e corresponder a `min(reserva, max(0, -saldo))` e `max(0, -saldo) - cobertura`, respectivamente. A geração, o saldo e a disponibilidade calculados para o próximo intervalo também precisam ser finitos; transbordamento numérico gera `ValueError`.
 
 ## Conferência independente
 
-Pendente: Davi deve calcular ao menos um caso desta tabela sem olhar o código e comparar com a saída do programa (passo 5 da issue #7).
+Concluída por Davi (@daviconinck) na [issue #7 (`#issuecomment-6805221411`)](https://github.com/bkampdev/FIAP-PBL-FASE-3/issues/7#issuecomment-6805221411), sem consultar o código: para a regra 2 (`alerta_deficit`, geração de 40 kWh, consumo de 70 kWh, reserva de 15 kWh e consumo essencial de 35 kWh), o cálculo manual indicou saldo de -30 kWh, cobertura disponível de 15 kWh, déficit restante de 15 kWh, estado `alerta_deficit`, preservação do suporte à vida e recomendação de redução dos não essenciais, coincidindo sem divergências com `python main.py --cenario deficit`.
