@@ -5,8 +5,8 @@ Responsável: Davi (@daviconinck)
 Data: 11/11/2026
 
 O registro original e a autorização do PR #24 estão preservados abaixo.
-A revalidação da candidata `47e29ef` está na última seção e não substitui
-a revisão pessoal pendente de Lorenzo.
+As revalidações de `47e29ef` e da candidata combinada estão nas seções
+finais e não substituem a revisão pessoal pendente de Lorenzo.
 
 ## Objetivo
 
@@ -283,3 +283,118 @@ Conclusão para Guilherme: a base `47e29ef` reproduz o fluxo integrado com
 #11 continua pendente da conferência humana indicada; merge anterior,
 reteste automatizado e ausência de falha não equivalem a essa aprovação.
 Nenhuma issue foi fechada e nenhuma entrega acadêmica foi realizada.
+
+## Revalidação combinada das issues #3, #6 e #11 — 11/11/2026
+
+### Base, candidata e reprodução
+
+Nesta rodada foram relidas a issue #11 integralmente (sem comentários),
+as descrições, comentários de conversa, reviews e comentários inline dos
+PRs #22, #23, #24 e #25. O PR #24 continua sem review pessoal de Lorenzo.
+Seu registro e o commit `52ab6ef592806ac9342f8039d0ec593b8f4e0ca3`
+foram preservados, sem reescrita ou atribuição de nova revisão humana.
+
+`git ls-remote origin refs/heads/main` confirmou novamente
+`47e29ef694c251040551add30c9d8ed882fcb10d`. Um novo clone remoto em
+`/tmp/pbl-issue-11-rodada2-20261111` começou e terminou a verificação da
+main sem alterações locais, com **100 testes aprovados**. Ambiente:
+macOS 26.0, build 25A5316i, arm64, Python 3.14.7; sem instalação de pacotes.
+
+Apenas nesse clone, em HEAD destacado, foram combinados os commits:
+
+- #11: `52ab6ef592806ac9342f8039d0ec593b8f4e0ca3`;
+- #3: `3bbacb235d22059a36598ee901b9aee226fe31e1`, rejeição direta de consumo negativo;
+- #6: `8880a67354f4e80a8a0f05f9ef8088ce8c89b643`, que preserva
+  `bedd675f4f44f0e7e876fc3ee95c901b6ee255dd`, ambos documentais;
+- o teste novo de CLI desta rodada, descrito abaixo.
+
+O commit temporário resultante é
+`8702be1e057ca90c4b4f6be54eac8915494f8508`, com **102 testes aprovados**
+e `git status --porcelain=v1` vazio antes/depois. Ele identifica a candidata
+efetivamente executada; não foi publicado nem deve ser usado como commit de
+entrega. As branches originais, autores e commits não foram alterados pela
+combinação. A branch isolada da #11, sem incorporar #3/#6, passou
+**101 testes**: os 100 da main mais um teste CLI; a regressão direta da #3
+é o teste adicional que leva a candidata combinada a 102.
+
+Comandos da preparação e validação, a partir da raiz da worktree da #11:
+
+```bash
+git clone --no-local --branch main https://github.com/bkampdev/FIAP-PBL-FASE-3.git /tmp/pbl-issue-11-rodada2-20261111
+cd /tmp/pbl-issue-11-rodada2-20261111
+git rev-parse HEAD
+git status --porcelain=v1
+python3 -m unittest discover -s tests -v
+git fetch '/Users/bkamp/orca/workspaces/PBL 3 - FASE 3/pbl-issue-11' bkampdev/pbl-issue-11 bkampdev/pbl-issue-3 bkampdev/pbl-issue-6
+git checkout --detach 52ab6ef592806ac9342f8039d0ec593b8f4e0ca3
+git merge --no-commit --no-ff 3bbacb235d22059a36598ee901b9aee226fe31e1 8880a67354f4e80a8a0f05f9ef8088ce8c89b643
+cp '/Users/bkamp/orca/workspaces/PBL 3 - FASE 3/pbl-issue-11/tests/test_integracao.py' tests/test_integracao.py
+git add tests/test_integracao.py
+git commit -m 'test: candidata temporaria de integracao das issues 3, 6 e 11'
+python3 -m unittest discover -s tests -v
+git status --porcelain=v1
+git diff --check
+```
+
+O arquivo de teste copiado tem blob Git
+`04cc86e74ab747437aab4216d61e7f489cff55cf`; uma nova reprodução pode criar
+outro SHA de commit devido à data, preservando o conteúdo conferido.
+As instruções do README para listagem, déficit e previsão isolada também
+foram reproduzidas com o `python` de um venv padrão em
+`/tmp/pbl-issue-11-rodada2-venv-20261111`: oito IDs e resultado `27.5`.
+O achado sobre escolha de `python3`/venv e a contagem do README continuam
+encaminhados à #14, sem edição de seus arquivos nesta tarefa.
+
+### Lacuna de cobertura fechada e reteste
+
+Reprodução: fornecer `--cenarios` com JSON contendo consumo `-5` no
+Suporte à vida ou no Laboratório do cenário `deficit`.
+
+Esperado: código 1, mensagem de erro de entrada identificando `consumo_kwh`,
+sem saldo, decisão atual ou previsão fictícios.
+
+Obtido: ambos os casos rejeitados como esperado, sem traceback ou stderr.
+O fluxo da CLI já rejeitava esses dados antes da correção direta da #3;
+a lacuna comprovada era a ausência de cobertura explícita desse consumidor
+inválido no caminho JSON → carregamento → CLI → saída. Foi adicionado
+somente `test_consumo_negativo_no_json_rejeitado_sem_resultado_ficticio`,
+em `tests/test_integracao.py`, com dois subcasos. Os três testes originais
+do PR #24 foram mantidos. Responsabilidade e estado: #11, cobertura concluída.
+
+Na candidata com #3, `decidir` também levantou
+`ValueError: consumo_kwh não pode ser negativo.` para o balanço
+aritmeticamente coerente da regressão direta; `executar_cenario` retornou
+erro em `cenario.sistemas[1].consumo_kwh`, sem balanço ou decisão.
+Isso confirma a correção da #3 sem copiar seu teste unitário para a #11.
+
+### Integração e acordos entre as issues
+
+Os oito cenários foram novamente executados por CLI e pelo integrador,
+com igualdade entre o texto da CLI e `formatar_resultado`. Comparação
+profunda confirmou cenário e histórico não mutados. `sys.setprofile`
+confirmou chamadas reais a validação/consulta de dados, balanço, ajuste e
+previsão, decisão, apresentação e integrador. O rastreio de `deficit` da
+seção anterior permanece válido: 40 − 70 = −30 kWh; cobertura potencial
+15 kWh; remanescente 15 kWh; `a=2.5`, `b=0`; eólica prevista 27,5 kWh;
+futuro 20 + 27,5 − 70 = −22,5 kWh, reserva restante hipotética zero.
+
+| Dependência | Comunicação e acordo nesta rodada |
+|---|---|
+| #2, dados de Davi | Solicitada confirmação de novas lacunas/SHA e de revisão humana; enviada evidência da candidata, sem alterar dados nem inferir aprovação |
+| #3, decisões de Lorenzo | Confirmado SHA `3bbacb2`; responsável reproduziu erro direto, integrador e CLI; acordado que apenas #11 acrescenta cobertura CLI, sem duplicar teste direto |
+| #6, cenários de Davi | Confirmado SHA `8880a67`, sem mudança de IDs/valores; responsável informou matriz/fronteiras de main com 100 testes, compatível com os oito cenários executados aqui; commits preservados |
+| #9, apresentação de Gabriel | Solicitadas mudanças de saída/lacunas; enviada evidência da candidata e do novo caso CLI, sem editar formatador ou seus testes |
+| #15, checklist de Guilherme | Acordado separar main (100), #11 isolada (101) e candidata combinada (102), manter #14 intocada e a revisão pessoal de Lorenzo pendente |
+
+Também foi confirmado com #8 que a cobertura CLI nova não muda as contas;
+seu responsável informou 101 testes na candidata anterior sem esse teste.
+As execuções informadas por outros responsáveis são distintas das
+execuções diretas registradas nesta seção.
+
+A frente #15 informou auditoria da API sem revisão humana de Lorenzo para
+#2/#6/#11 e registrou revisões pessoais de Davi nas issues #3/#7/#12.
+Esses registros existentes são preservados; esta conferência técnica não
+os substitui nem os amplia. Sem bloqueador funcional observado nesta
+candidata; o aceite da #11 permanece pendente de Lorenzo. Alterações
+posteriores e o SHA da PR consolidada exigem nova verificação pelo
+coordenador. README, relatório final, PDF e gerador da #14 ficaram intocados.
