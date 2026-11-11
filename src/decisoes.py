@@ -66,7 +66,8 @@ def _conferir_entradas(cenario, balanco, previsao):
                 raise ValueError(f"Sistema sem o campo obrigatório: {campo}.")
         if not isinstance(sistema["essencial"], bool):
             raise ValueError("essencial deve ser booleano.")
-        _numero(sistema["consumo_kwh"], "consumo_kwh")
+        if _numero(sistema["consumo_kwh"], "consumo_kwh") < 0:
+            raise ValueError("consumo_kwh não pode ser negativo.")
 
     suporte = [s for s in sistemas if s["id"] == "suporte_vida"]
     if len(suporte) != 1 or suporte[0]["essencial"] is not True:
