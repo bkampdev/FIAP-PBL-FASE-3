@@ -16,7 +16,7 @@ Estado: proposta inicial; não existe implementação destes contratos. Ajustes 
 | Módulo / autor | Interface proposta | Retorno / responsabilidade |
 |---|---|---|
 | `src/dados.py` — Davi | `carregar_cenarios(caminho)`, `validar_cenario(cenario)`, `buscar_subsistema(hierarquia, caminho)` | Cenários, lista de erros e nó encontrado; não decidir segurança energética |
-| `src/energia.py` — Eduardo | `analisar_energia(cenario)` | Geração total, consumo total/essencial, saldo, reserva e classificação |
+| `src/energia.py` — Eduardo | `analisar_energia(cenario)` | Balanço em kWh conforme os campos abaixo; sem mutação nem escolha de cargas |
 | `src/previsao.py` — Gabriel | `ajustar_reta(x,y)`, `prever_energia(modelo,vento)` | Coeficientes, faixa histórica, estimativa e aviso de extrapolação |
 | `src/decisoes.py` — Lorenzo | `decidir(cenario,balanco,previsao)` | Status, ações/motivos atuais e recomendação futura |
 | `src/apresentacao.py` — Gabriel | `formatar_resultado(resultado)` | Texto; sem recalcular regras ou números |
@@ -35,3 +35,11 @@ Sem implementação de armazenamento/controle físico, as saídas são recomenda
 ## Aceite numérico de referência
 
 Com x=[8,10,12] e y=[20,25,30], `a=2.5`, `b=0`, e `y(11)=27.5`. Usar tolerância numérica nos testes. x sem variação não permite ajuste. Consulta fora da faixa deve produzir aviso; não substituir previsões ruins por um valor seguro silenciosamente.
+
+## Retorno energético implementado (#4, PR #20)
+
+`analisar_energia(cenario)` recebe o cenário com energias em kWh. Valida operandos matemáticos (incluindo consumos e `essencial` booleano), rejeitando `bool` como número, negativos, valores não finitos e somas que excedam a escala finita com `ValueError`. `intervalo_h` positivo tem padrão explícito de 1 h quando ausente, sem mutar a entrada. Não multiplica novamente energias pela duração. A validação completa de IDs, hierarquia e prioridades pertence ao módulo de dados.
+
+Retorna `geracao_total_kwh`, `consumo_total_kwh`, `consumo_essencial_kwh`, `saldo_kwh`, `classificacao` (`deficit`, `equilibrio`, `excedente`), `reserva_usada_kwh` e `deficit_remanescente_kwh`. `reserva_usada_kwh` é cobertura potencial `min(reserva_kwh, max(0, -saldo_kwh))`; não altera estoque nem saldo bruto. Déficit remanescente é `max(0, -saldo_kwh) - reserva_usada_kwh`. A reserva disponível permanece no cenário.
+
+A API numérica original `calcular_balanco_energia(solar, eolica, consumo, reserva_atual=0)` permanece disponível com validação e os retornos originais; consumidores integrados devem usar `analisar_energia`. O status legado `DÉFICIT_CRITICO` significa reserva insuficiente para o déficit total; a decisão sobre insuficiência essencial pertence ao módulo de decisões.
