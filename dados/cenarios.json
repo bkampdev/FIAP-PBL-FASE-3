@@ -1,0 +1,243 @@
+
+[
+  {
+    "id": "nominal",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 35.0,
+    "geracao_eolica_kwh": 25.0,
+    "reserva_kwh": 15.0,
+    "vento_previsto_ms": 10.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 30.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 20.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "deficit",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 20.0,
+    "geracao_eolica_kwh": 20.0,
+    "reserva_kwh": 15.0,
+    "vento_previsto_ms": 11.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 35.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "excedente",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 50.0,
+    "geracao_eolica_kwh": 30.0,
+    "reserva_kwh": 10.0,
+    "vento_previsto_ms": 12.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 20.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 10.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "equilibrio",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 30.0,
+    "geracao_eolica_kwh": 20.0,
+    "reserva_kwh": 0.0,
+    "vento_previsto_ms": 8.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 15.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "alerta_critico",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 5.0,
+    "geracao_eolica_kwh": 5.0,
+    "reserva_kwh": 5.0,
+    "vento_previsto_ms": 8.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 15.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "fronteira_essencial",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 20.0,
+    "geracao_eolica_kwh": 10.0,
+    "reserva_kwh": 5.0,
+    "vento_previsto_ms": 10.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 15.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "vento_baixo",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 20.0,
+    "geracao_eolica_kwh": 20.0,
+    "reserva_kwh": 0.0,
+    "vento_previsto_ms": 8.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 15.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  },
+  {
+    "id": "vento_alto",
+    "intervalo_h": 1.0,
+    "geracao_solar_kwh": 20.0,
+    "geracao_eolica_kwh": 20.0,
+    "reserva_kwh": 0.0,
+    "vento_previsto_ms": 12.0,
+    "sistemas": [
+      {
+        "id": "suporte_vida",
+        "nome": "Suporte à vida",
+        "consumo_kwh": 35.0,
+        "essencial": true,
+        "prioridade": 1
+      },
+      {
+        "id": "laboratorio",
+        "nome": "Laboratório",
+        "consumo_kwh": 15.0,
+        "essencial": false,
+        "prioridade": 2
+      }
+    ],
+    "hierarquia": {
+      "colonia": {
+        "energia": {"solar": {}, "eolico": {}},
+        "consumidores": {"suporte_vida": {}, "laboratorio": {}}
+      }
+    }
+  }
+]
