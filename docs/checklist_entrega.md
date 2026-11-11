@@ -1,6 +1,16 @@
-# Checklist de entrega e matriz de evidências — Issue #15 (ainda pendente de #14 e envio no FIAP ON)
+# Checklist de entrega e matriz de evidências — Issue #15 (envio pendente)
 
-Conferência somente leitura executada em **11/11/2026** sobre a `main` (`47e29ef694c251040551add30c9d8ed882fcb10d`) e alinhada com as frentes relacionadas desta rodada. Nenhuma entrega foi enviada ao portal FIAP ON, nenhuma alteração de equipe/convites foi realizada e os arquivos da issue #14 (`README.md`, `relatorio/relatorio.md`, `relatorio/relatorio.pdf`, `scripts/gerar_relatorio.py`) permaneceram intocados.
+## Estado atualizado após a PR #27 e candidata da #14
+
+- [x] A [PR #27](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/27) foi integrada à `main` no commit `6f8435480293b1d38a146e399b4fbb54c2e6d9c3`; a suíte foi reexecutada nessa base com **105 testes OK**.
+- [x] A [PR #28](https://github.com/bkampdev/FIAP-PBL-FASE-3/pull/28) contém, no commit `9e586a126057dc026623eab91eb2829d2bb42064`, README com saída real da CLI e fonte/PDF do relatório final. O PDF tem duas páginas, as seções exigidas e link público clicável; as páginas foram inspecionadas visualmente. Esta é uma candidata em PR, ainda não um commit integrado à `main`.
+- [ ] Revisões pessoais de Eduardo (contas) e Lorenzo (regras e legibilidade) da #14 registradas no GitHub.
+- [ ] Cinco integrantes conferidos na atividade correta, formatos/anexos confirmados e pacote final correspondente ao mesmo commit integrado.
+- [ ] Envio no FIAP ON realizado e comprovante/status do portal registrado. A issue #15 permanece aberta até essa confirmação.
+
+## Registro da auditoria anterior (base `47e29ef`)
+
+O registro abaixo preserva a conferência somente leitura executada em **11/11/2026** sobre a `main` anterior (`47e29ef694c251040551add30c9d8ed882fcb10d`). Seus estados e SHAs descrevem aquela base histórica; o estado atual está acima. Naquela auditoria, nenhuma entrega havia sido enviada ao FIAP ON, nenhuma alteração de equipe/convites havia sido realizada e os arquivos da issue #14 (`README.md`, `relatorio/relatorio.md`, `relatorio/relatorio.pdf`, `scripts/gerar_relatorio.py`) estavam intocados.
 
 ## 1. Status do checklist de entrega
 
