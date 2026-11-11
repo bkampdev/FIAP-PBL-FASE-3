@@ -6,6 +6,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import MappingProxyType
 
 from src.dados import (
     buscar_subsistema,
@@ -60,6 +61,22 @@ class TestDados(unittest.TestCase):
 
     def test_cenario_valido(self):
         self.assertEqual(validar_cenario(cenario_exemplo()), [])
+
+    def test_rejeita_folhas_que_comparam_igual_a_dict_mas_nao_sao_dict(self):
+        for grupo, identificador in (
+            ("energia", "solar"),
+            ("energia", "eolico"),
+            ("consumidores", "suporte_vida"),
+            ("consumidores", "laboratorio"),
+        ):
+            with self.subTest(grupo=grupo, identificador=identificador):
+                cenario = cenario_exemplo()
+                cenario["hierarquia"]["colonia"][grupo][identificador] = (
+                    MappingProxyType({})
+                )
+                erros = validar_cenario(cenario)
+                self.assertTrue(erros)
+                self.assertTrue(any(identificador in erro for erro in erros))
 
     def test_deficit_e_valido(self):
         cenario = cenario_exemplo()

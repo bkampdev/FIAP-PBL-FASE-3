@@ -115,7 +115,9 @@ def _validar_hierarquia(hierarquia, ids_sistemas):
             )
 
         for fonte in ("solar", "eolico"):
-            if fonte in energia and energia[fonte] != {}:
+            if fonte in energia and (
+                not isinstance(energia[fonte], dict) or energia[fonte] != {}
+            ):
                 erros.append(
                     f"cenario.hierarquia.colonia.energia.{fonte}: "
                     "deve ser folha vazia"
@@ -137,7 +139,11 @@ def _validar_hierarquia(hierarquia, ids_sistemas):
                 )
 
         for identificador, folha in consumidores.items():
-            if not _texto_valido(identificador) or folha != {}:
+            if (
+                not _texto_valido(identificador)
+                or not isinstance(folha, dict)
+                or folha != {}
+            ):
                 erros.append(
                     f"cenario.hierarquia: consumidor "
                     f"{identificador!r} deve ter folha vazia"
