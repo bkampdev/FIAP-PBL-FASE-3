@@ -1,7 +1,7 @@
-
 # Revisão final do sistema integrado — Issue #11
 
-Responsável: Davi (@daviconinck)  
+Responsável: Davi (@daviconinck)
+
 Data: 11/11/2026
 
 ## Objetivo
@@ -80,12 +80,52 @@ Reteste: os três testes complementares passaram.
 
 Estado: corrigido no teste complementar.
 
+### Instruções de execução desatualizadas no README
+
+Reprodução: consultar o README no commit `8a8e366`. O estado da versão
+ainda apresenta a integração da issue #10 como pendente, e o comando
+principal aparece como sujeito à conferência após a integração.
+
+Esperado: instruções suficientes para listar os cenários e executar o
+programa integrado a partir de uma cópia limpa.
+
+Obtido: a integração já está disponível desde `9d0b0d8`, mas o README
+não apresenta `python main.py --listar` e trata a execução integrada
+como futura.
+
+Responsável pela correção: Guilherme (@bkampdev).
+
+Correção: atualizar o estado da versão, documentar os comandos de
+listagem e análise e informar os resultados esperados do déficit.
+
+Reteste: comandos de listagem e análise de déficit executados com sucesso;
+oito cenários listados e valores conferidos com a tabela deste documento.
+A suíte completa aprovou os 100 testes em macOS com Python 3.14.7.
+
+Estado: corrigido neste PR.
+
+## Conferência complementar e autorização de integração
+
+Em 11/11/2026, a conferência do commit `8a8e366` e das correções
+documentais deste PR verificou o diff, os critérios das issues e a suíte
+completa. Também foram conferidos a listagem, o déficit, o alerta crítico,
+a fronteira essencial e a rejeição de cenário inexistente.
+
+Os módulos de dados e cenários das issues #2 e #6 já estão na `main`
+desde o PR #21. Este PR acrescenta os três testes complementares e o
+registro de revisão da issue #11, além da atualização do README.
+
+Guilherme (@bkampdev) autorizou expressamente as correções, o commit
+neste PR e o merge após validação. A revisão individual de Lorenzo
+continua pendente; essa autorização não representa aprovação de Lorenzo
+nem cumprimento automático de todos os critérios de aceite das issues.
+
 ## Pendências
 
 - Solicitar a Lorenzo revisão independente dos arquivos
   de dados e testes produzidos por Davi.
-- Encaminhar a Guilherme a conclusão da revisão.
-- Confirmar aprovação do Pull Request antes de integrar à main.
+- Registrar o resultado dessa revisão antes de concluir o aceite da
+  issue #11. O merge autorizado por Guilherme não encerra essa pendência.
 
 ## Conclusão
 
@@ -97,5 +137,7 @@ executados 100 testes após a inclusão dos três testes
 complementares, conforme resultado informado pelo responsável.
 
 Nenhum bloqueador funcional foi identificado nas execuções
-registradas. A aprovação independente dos colegas permanece
-pendente.
+registradas. A conferência complementar aprovou os 100 testes e
+verificou as instruções atualizadas do README. A integração foi
+autorizada por Guilherme; a aprovação independente de Lorenzo permanece
+pendente e não foi atribuída a ele.
