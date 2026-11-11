@@ -380,10 +380,10 @@ futuro 20 + 27,5 − 70 = −22,5 kWh, reserva restante hipotética zero.
 
 | Dependência | Comunicação e acordo nesta rodada |
 |---|---|
-| #2, dados de Davi | Solicitada confirmação de novas lacunas/SHA e de revisão humana; enviada evidência da candidata, sem alterar dados nem inferir aprovação |
+| #2, dados de Davi | Confirmado `07fa900`, apenas `docs/dados.md`, sem lacuna funcional ou mudança de contrato/dados/testes; responsável confirmou ausência de revisão pessoal de Lorenzo sobre dados/testes de Davi |
 | #3, decisões de Lorenzo | Confirmado SHA `3bbacb2`; responsável reproduziu erro direto, integrador e CLI; acordado que apenas #11 acrescenta cobertura CLI, sem duplicar teste direto |
 | #6, cenários de Davi | Confirmado SHA `8880a67`, sem mudança de IDs/valores; responsável informou matriz/fronteiras de main com 100 testes, compatível com os oito cenários executados aqui; commits preservados |
-| #9, apresentação de Gabriel | Solicitadas mudanças de saída/lacunas; enviada evidência da candidata e do novo caso CLI, sem editar formatador ou seus testes |
+| #9, apresentação de Gabriel | Confirmado `2114e71`, apenas exemplos documentais; acordado que o caso negativo CLI da #11 não duplica seus quatro testes; formatador/contrato preservados, revisão pessoal de Lorenzo ainda pendente |
 | #15, checklist de Guilherme | Acordado separar main (100), #11 isolada (101) e candidata combinada (102), manter #14 intocada e a revisão pessoal de Lorenzo pendente |
 
 Também foi confirmado com #8 que a cobertura CLI nova não muda as contas;
@@ -398,3 +398,41 @@ os substitui nem os amplia. Sem bloqueador funcional observado nesta
 candidata; o aceite da #11 permanece pendente de Lorenzo. Alterações
 posteriores e o SHA da PR consolidada exigem nova verificação pelo
 coordenador. README, relatório final, PDF e gerador da #14 ficaram intocados.
+
+### Complemento após respostas finais de #2, #7 e #9
+
+O commit de entrega `3c1b95984b771e76e9425d9a6c632e15ed0ab4bb` registra
+o teste CLI e a conferência anterior da #11, preservando `52ab6ef`.
+Após esse registro chegaram três commits que foram lidos e acrescentados
+somente à cópia temporária, sem mudar as branches dos responsáveis:
+
+- #2: `07fa9001cbee789d6a3ced97f69d85a32e1900c4`, atualização documental
+  de integração, sem alteração de dados, código ou testes;
+- #7: `61f3471d896b153f0962ff38763714565d157dc3`, três testes combinados
+  adicionais de prioridades e atualização de `docs/regras.md`, preservando
+  o registro da conta manual feita por Davi;
+- #9: `2114e719f348fa6d111e518c58f8522e5e880460`, nove exemplos reais
+  de CLI em `docs/exemplos_saida.md`, sem mudança funcional do formatador.
+
+A candidata temporária ampliada
+`ad05360861425d13a1bce0d2f2166b769208bd4f` contém esses três commits,
+além de #3/#6/#11 já conferidos, e passou
+`python3 -m unittest discover -s tests`: **105 testes, OK**.
+O acréscimo de 102 para 105 corresponde exclusivamente aos três testes
+da #7. A worktree isolada da #11 continua com 101; este complemento só
+altera documentação. `git status --porcelain=v1` permaneceu vazio na
+candidata e `git diff --check` não indicou erros.
+
+Os nove pares comando/saída de `docs/exemplos_saida.md` foram extraídos
+dos blocos Markdown e comparados com stdout integral da CLI nesta candidata:
+listagem, nominal, déficit, excedente, vento baixo, vento alto, fronteira
+essencial, alerta crítico e cenário inexistente. Todos coincidiram,
+incluindo acentos e quebras de linha; retornos 0 nos válidos e 1 no
+inexistente. A conferência foi comunicada às frentes #7/#9/#15.
+
+Os acordos de #2/#3/#6/#9/#15 foram recebidos e respondidos por
+`orca orchestration`; nenhuma divergência funcional ficou aberta.
+Permanece a revisão pessoal de Lorenzo sobre dados/testes de Davi e a
+revalidação no SHA final da PR consolidada, a cargo do coordenador.
+Este resultado de integração não fecha issues, não publica PR individual
+e não representa envio ao FIAP.
