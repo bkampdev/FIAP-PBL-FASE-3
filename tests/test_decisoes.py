@@ -163,6 +163,16 @@ class TestContrato(unittest.TestCase):
         with self.assertRaises(ValueError):
             decidir(cenario, balanco, None)
 
+    def test_rejeita_consumo_negativo_mesmo_com_balanco_coerente(self):
+        cenario = cenario_base(lab=-5)
+        balanco = {
+            "geracao_total_kwh": 40, "consumo_total_kwh": 30,
+            "consumo_essencial_kwh": 35, "saldo_kwh": 10,
+            "reserva_usada_kwh": 0, "deficit_remanescente_kwh": 0,
+        }
+        with self.assertRaisesRegex(ValueError, "consumo_kwh"):
+            decidir(cenario, balanco, None)
+
     def test_balanco_sem_chave_gera_erro(self):
         cenario = cenario_base()
         balanco = analisar_energia(cenario)

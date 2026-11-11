@@ -112,15 +112,18 @@ for nome, no in (("solar", solar), ("eolico", eolico), ("nuclear", ausente)):
 ```
 
 Uma folha válida `{}` e `None` são ambos falsos em uma condição simples.
-Use `is None` para distinguir ausência de folha vazia. Essas são as
-consultas previstas para a integração da issue #10; a execução integrada
-ainda depende de `main.py` e `src/decisoes.py`.
+Use `is None` para distinguir ausência de folha vazia. No fluxo integrado
+da issue #10, `src/sistema.py` executa essas consultas para `solar` e
+`eolico` em `executar_cenario`, enquanto `main.py` carrega os JSONs por
+`carregar_cenarios` e `carregar_historico`.
 
 ## Verificação
 
 ```bash
 python3 -m unittest discover -s tests -p test_dados.py -v
 python3 -m unittest discover -s tests -v
+python3 main.py --listar
+python3 main.py --cenario deficit
 ```
 
 Os oito cenários e as contas esperadas estão em [cenarios.md](cenarios.md).

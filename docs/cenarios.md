@@ -110,9 +110,9 @@ Não reutilizar toda a reserva inicial no próximo intervalo.
 
 ### Prioridade e recomendações esperadas
 
-Estas são referências de aceite das issues #3 e #10, ainda dependentes de
-`src/decisoes.py` e `main.py`. Não representam execução integrada concluída,
-redução física de cargas ou armazenamento realizado.
+Estas são referências para conferir a execução integrada por `main.py` e
+`src/decisoes.py`. As recomendações não representam redução física de cargas
+ou armazenamento realizado.
 
 | Cenário | Status atual esperado | Prioridade e recomendação esperadas |
 |---|---|---|
@@ -157,8 +157,8 @@ A recomendação final depende das regras do módulo de decisões.
 
 Executar na raiz do projeto:
 
-    python -m json.tool dados/cenarios.json
-    python -m json.tool dados/historico_eolico.json
+    python3 -m json.tool dados/cenarios.json
+    python3 -m json.tool dados/historico_eolico.json
 
 Carregar os arquivos pelo módulo de dados:
 
@@ -196,8 +196,9 @@ pois representa risco operacional e não erro de formato.
 
 ## Integração e revisão
 
-Os arquivos devem ser utilizados pelo programa principal
-da Issue #10.
+O programa principal da Issue #10 carrega os arquivos e executa os cenários.
+Por exemplo, `python3 main.py --cenario vento_baixo` e
+`python3 main.py --cenario vento_alto` demonstram as duas condições de vento.
 
 A compatibilidade dos cálculos e das recomendações deverá
 ser conferida com Eduardo e Lorenzo.
@@ -231,5 +232,5 @@ for cenario in cenarios:
 As colunas são ID, saldo atual, cobertura potencial, déficit remanescente,
 eólica prevista e saldo futuro. Para `deficit`, a linha é
 `deficit -30.0 15.0 15.0 27.5 -22.5`, conforme as tabelas.
-A conferência independente por Eduardo e Lorenzo e a demonstração integrada
-permanecem pendentes; este documento não fecha automaticamente as issues.
+A conferência independente por Eduardo e Lorenzo permanece pendente; a
+execução integrada não fecha automaticamente as issues.
