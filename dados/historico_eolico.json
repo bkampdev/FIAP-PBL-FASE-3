@@ -1,0 +1,6 @@
+
+{
+  "intervalo_h": 1.0,
+  "vento_ms": [8.0, 10.0, 12.0],
+  "energia_eolica_kwh": [20.0, 25.0, 30.0]
+}
