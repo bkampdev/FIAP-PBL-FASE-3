@@ -164,14 +164,19 @@ class TestContrato(unittest.TestCase):
             decidir(cenario, balanco, None)
 
     def test_rejeita_consumo_negativo_mesmo_com_balanco_coerente(self):
-        cenario = cenario_base(lab=-5)
-        balanco = {
-            "geracao_total_kwh": 40, "consumo_total_kwh": 30,
-            "consumo_essencial_kwh": 35, "saldo_kwh": 10,
-            "reserva_usada_kwh": 0, "deficit_remanescente_kwh": 0,
-        }
-        with self.assertRaisesRegex(ValueError, "consumo_kwh"):
-            decidir(cenario, balanco, None)
+        for kwargs, total, essencial in (
+            ({"lab": -5}, 30, 35),
+            ({"vida": -5}, 30, -5),
+        ):
+            with self.subTest(kwargs=kwargs):
+                cenario = cenario_base(**kwargs)
+                balanco = {
+                    "geracao_total_kwh": 40, "consumo_total_kwh": total,
+                    "consumo_essencial_kwh": essencial, "saldo_kwh": 10,
+                    "reserva_usada_kwh": 0, "deficit_remanescente_kwh": 0,
+                }
+                with self.assertRaisesRegex(ValueError, "consumo_kwh|consumo_essencial_kwh"):
+                    decidir(cenario, balanco, None)
 
     def test_balanco_sem_chave_gera_erro(self):
         cenario = cenario_base()
@@ -200,11 +205,24 @@ class TestContrato(unittest.TestCase):
             decidir(cenario, balanco, None)
 
     def test_suporte_vida_nao_essencial_gera_erro(self):
-        cenario = cenario_base()
-        cenario["sistemas"][0]["essencial"] = False
-        balanco = analisar_energia(cenario)
-        with self.assertRaises(ValueError):
-            decidir(cenario, balanco, None)
+        nao_essencial = cenario_base()
+        nao_essencial["sistemas"][0]["essencial"] = False
+
+        prioridade_errada = cenario_base()
+        prioridade_errada["sistemas"][0]["prioridade"] = 2
+
+        ausente = cenario_base()
+        ausente["sistemas"][0]["id"] = "agua"
+
+        for nome, cenario in (
+            ("nao_essencial", nao_essencial),
+            ("prioridade_2", prioridade_errada),
+            ("ausente", ausente),
+        ):
+            with self.subTest(caso=nome):
+                balanco = analisar_energia(cenario)
+                with self.assertRaisesRegex(ValueError, "suporte_vida"):
+                    decidir(cenario, balanco, None)
 
     def test_tipos_invalidos(self):
         cenario = cenario_base()
@@ -212,9 +230,47 @@ class TestContrato(unittest.TestCase):
         for args in [(None, balanco, None), (cenario, [], None), (cenario, balanco, "x")]:
             with self.subTest(args=repr(args)[:40]), self.assertRaises(ValueError):
                 decidir(*args)
-        balanco["saldo_kwh"] = True
+
+        balanco_bool = dict(balanco)
+        balanco_bool["saldo_kwh"] = True
         with self.assertRaises(ValueError):
-            decidir(cenario, balanco, None)
+            decidir(cenario, balanco_bool, None)
+
+        cenario_overflow = cenario_base()
+        cenario_overflow["geracao_solar_kwh"] = 10**400
+        with self.assertRaises(ValueError):
+            decidir(cenario_overflow, balanco, None)
+
+        for invalida in (True, 0, -1, 1.5, "2"):
+            with self.subTest(prioridade=invalida):
+                c = cenario_base()
+                c["sistemas"][1]["prioridade"] = invalida
+                with self.assertRaisesRegex(ValueError, "prioridade"):
+                    decidir(c, analisar_energia(c), None)
+
+        for campo, valor in (("id", ""), ("id", 123), ("nome", "  "), ("nome", None)):
+            with self.subTest(campo=campo, valor=valor):
+                c = cenario_base()
+                c["sistemas"][1][campo] = valor
+                with self.assertRaisesRegex(ValueError, campo):
+                    decidir(c, analisar_energia(c), None)
+
+        duplicado = cenario_base()
+        duplicado["sistemas"].append({
+            "id": "laboratorio", "nome": "Lab extra", "consumo_kwh": 5.0,
+            "essencial": False, "prioridade": 3,
+        })
+        with self.assertRaisesRegex(ValueError, "duplicado"):
+            decidir(duplicado, analisar_energia(duplicado), None)
+
+        intervalo_zero = cenario_base()
+        intervalo_zero["intervalo_h"] = 0
+        with self.assertRaisesRegex(ValueError, "intervalo_h"):
+            decidir(intervalo_zero, balanco, None)
+
+        previsao_aviso_invalido = {"energia_eolica_prevista_kwh": 27.5, "aviso": 123}
+        with self.assertRaisesRegex(ValueError, "aviso"):
+            decidir(cenario, balanco, previsao_aviso_invalido)
 
     def test_ordenar_reducao_exclui_essenciais(self):
         self.assertEqual([s["id"] for s in ordenar_reducao(cenario_base()["sistemas"])],
